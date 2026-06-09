@@ -1,0 +1,26 @@
+# Python 编译缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.conda/
+
+# IDE 与系统临时文件
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# 量化系统数据底座（核心：绝对禁止将大容量行情数据推送到 GitHub）
+data/
+*.parquet
+*.csv
+*.pkl
+
+# 日志与凭证
+*.log
+.env
