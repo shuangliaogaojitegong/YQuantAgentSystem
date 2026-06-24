@@ -41,5 +41,5 @@ def verify_cross_platform_connection(windows_ip: str, port: int = 11434):
 
 if __name__ == "__main__":
     # 硬核硬编码：直接绑定上一步在 Windows 上获取的局域网 IP
-    WINDOWS_LAN_IP = "192.168.1.109"
+    WINDOWS_LAN_IP = "192.168.1.108"
     verify_cross_platform_connection(WINDOWS_LAN_IP)

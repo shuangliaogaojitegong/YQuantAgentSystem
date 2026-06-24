@@ -4,6 +4,7 @@
 文件名: llm_provider.py
 描述: 统一大模型路由客户端（兼容Ollama API），支持同步/流式调用与硬核容错机制
 环境: Mac 本地运行，连接 Windows 算力端
+数据源上下文: 全面转为美股市场及 Yahoo Finance (yfinance) 数据链
 """
 
 import os
@@ -25,7 +26,7 @@ logger = logging.getLogger("LLMProvider")
 
 class HybridLLMClient:
     """统一大模型通信路由客户端"""
-    def __init__(self, windows_ip: str = "192.168.1.109", port: int = 11434, default_model: str = "deepseek-r1:8b"):
+    def __init__(self, windows_ip: str = "192.168.1.108", port: int = 11434, default_model: str = "deepseek-r1:8b"):
         """
         初始化大模型客户端
         :param windows_ip: Windows 算力机的局域网 IP
@@ -37,7 +38,7 @@ class HybridLLMClient:
         
         logger.info(f"正在初始化大模型客户端，路由指向 Windows 算力端: {self.base_url}")
         try:
-            # 使用 openai 库兼容 Ollama 的 v1 接口
+            # 使用 openai 库兼容 Ollama/vLLM 的 v1 接口
             self.client = OpenAI(
                 base_url=self.base_url,
                 api_key="ollama_local_bypass"
@@ -53,7 +54,6 @@ class HybridLLMClient:
         """
         logger.info(f"发起同步模型调用请求，目标模型: {self.default_model}, Temperature: {temperature}")
         try:
-            # 【已修正 Bug】直接调用 chat.completions.create
             response = self.client.chat.completions.create(
                 model=self.default_model,
                 messages=messages,
@@ -99,15 +99,16 @@ class HybridLLMClient:
 
 if __name__ == "__main__":
     print("\n" + "="*50)
-    print("开始执行 llm_provider.py 模块冒烟测试")
+    print("开始执行 llm_provider.py 模块冒烟测试（美股雅虎生态定制版）")
     print("="*50)
     
-    # 基于你的局域网实际 IP 进行实例化
-    llm = HybridLLMClient(windows_ip="192.168.1.109", default_model="deepseek-r1:8b")
+    # 实例化
+    llm = HybridLLMClient(windows_ip="192.168.1.108", default_model="deepseek-r1:8b")
     
+    # 将测试用例更新为面向美股（雅虎财经数据源）的量化因子指令测试
     test_messages = [
-        {"role": "system", "content": "你是一个严谨的量化金融专家。"},
-        {"role": "user", "content": "请用一句话解释什么是量化回测中的‘前瞻偏差’ (Look-ahead bias)。"}
+        {"role": "system", "content": "你是一个精通美股多因子选股体系的资深量化金融专家。你的任务是编写基于 pandas/numpy 的高性能矢量化算子。"},
+        {"role": "user", "content": "我们要针对从 Yahoo Finance 抓取的标普500成分股历史行情（包含 Open, High, Low, Close, Volume, Adj Close 字段）计算一个 20 日动量排名截面因子 (Cross-sectional Momentum Rank)。请用一句话描述编写该算子时应如何利用 pandas.groupby 避免产生截面时间死循环。"}
     ]
     
     # 1. 测试同步接口
