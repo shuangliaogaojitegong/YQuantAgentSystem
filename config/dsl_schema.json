@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Factor Expression DSL Schema",
+  "description": "Quantitative factor expression tree schema for LangGraph pipeline",
+  "definitions": {
+    "ExpressionNode": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "ts_rank", "ts_sum", "ts_delay", "ts_corr",
+            "group_rank", "neutralize",
+            "add", "sub", "mul", "div", "sqrt", "log",
+            "conditional"
+          ],
+          "description": "Operator name from registered operator registry"
+        },
+        "args": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/ExpressionNode" },
+              {
+                "type": "string",
+                "description": "Data column name (e.g., 'close', 'volume', 'returns')"
+              },
+              {
+                "type": "number",
+                "description": "Constant numeric parameter (e.g., window=5, delay=2)"
+              }
+            ]
+          },
+          "description": "Ordered arguments for the operator"
+        }
+      },
+      "required": ["op", "args"]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "expression_tree": {
+      "$ref": "#/definitions/ExpressionNode",
+      "description": "Root node of the factor expression tree"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "max_depth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Tree depth (max 5 to prevent overfitting)"
+        },
+        "family_tag": {
+          "type": "string",
+          "enum": ["momentum", "value", "growth", "volatility", "liquidity", "quality", "other"],
+          "description": "Factor family classification"
+        }
+      },
+      "required": ["max_depth", "family_tag"]
+    }
+  },
+  "required": ["expression_tree", "metadata"]
+}
